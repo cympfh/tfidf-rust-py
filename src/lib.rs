@@ -6,6 +6,7 @@ use cpython::{PyResult, Python};
 py_module_initializer!(libtfidf, initlibtfidf, PyInit_libtfidf, |py, m| {
     m.add(py, "__doc__", "tf-idf")?;
     m.add(py, "tfidf", py_fn!(py, tfidf_py(docs: Vec<Vec<usize>>)))?;
+    m.add(py, "tf", py_fn!(py, tf_py(docs: Vec<Vec<usize>>)))?;
     Ok(())
 });
 
@@ -53,5 +54,35 @@ fn tfidf(docs: &Vec<Vec<usize>>) -> SparseMatrix {
 
 fn tfidf_py(_: Python, docs: Vec<Vec<usize>>) -> PyResult<SparseMatrix> {
     let out = tfidf(&docs);
+    Ok(out)
+}
+
+
+fn tf(docs: &Vec<Vec<usize>>) -> SparseMatrix {
+    use std::collections::HashMap;
+
+    let docsize = docs.len();
+    let vocsize = docs.iter().map(|d| d.iter().max().unwrap_or(&0)).max().unwrap_or(&0) + 1;
+
+    let mut tf = vec![];
+
+    // * tf
+    for i in 0..docsize {
+        let mut ws = HashMap::new();
+        for &w in docs[i].iter() {
+            let count = ws.entry(w).or_insert(0);
+            *count += 1;
+        }
+        for (&w, &count) in ws.iter() {
+            if count == 0 { continue }
+            tf.push((i, w, count as f32));
+        }
+    }
+
+    (docsize, vocsize, tf)
+}
+
+fn tf_py(_: Python, docs: Vec<Vec<usize>>) -> PyResult<SparseMatrix> {
+    let out = tf(&docs);
     Ok(out)
 }
