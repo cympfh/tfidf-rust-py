@@ -30,20 +30,26 @@ Copy the `so` (or `dylib`) file as `libtfidf.so`, and you can import it from Pyt
 # ipython
 In [1]: from libtfidf import tfidf
 
-In [2]: corpus = [[0, 0, 1, 2], [0, 1, 4], [1, 2]]
+In [2]: corpus = [[0, 0, 1, 2], [0, 1, 3, 4], [1, 2]]l
+
+# A corpus is a list of document.
+# A document is a list of word.
+# Word is natural integer (0,1,2,...).
 
 In [3]: tfidf(corpus)
 Out[3]:
 (3,
- 3,
-  [(0, 0, 0.8109301924705505),
-   (0, 2, 0.40546509623527527),
-   (1, 0, 0.40546509623527527),
-   (2, 2, 0.40546509623527527)])
+ 5,
+ [(0, 0, 0.8109301924705505),
+  (0, 2, 0.40546509623527527),
+  (1, 0, 0.40546509623527527),
+  (1, 3, 1.0986123085021973),
+  (1, 4, 1.0986123085021973),
+  (2, 2, 0.40546509623527527)])
 
 # Output is a matrix, its shape is (document-size)x(vocaburary-size)
 
-# This is 3x3 matrix
+# This is 3x5 matrix
 # The list in 3rd position is a list of (row, column, value)
 
 # This matrix will be converted to scipy.sparse.csr_matrix easily
@@ -52,16 +58,16 @@ In [4]: from scipy.sparse import csr_matrix
 
 In [5]: n, m, data = tfidf(corpus)
 
+In [6]: rows, cols, values = zip(*data)
 
-In [27]: csr_matrix((values, (rows, cols)), shape=(n, m))
-Out[27]:
+In [7]: csr_matrix((values, (rows, cols)), shape=(n, m))
+Out[7]:
 <3x5 sparse matrix of type '<class 'numpy.float64'>'
-        with 5 stored elements in Compressed Sparse Row format>
+        with 6 stored elements in Compressed Sparse Row format>
 
-In [28]: csr_matrix((values, (rows, cols)), shape=(n, m)).todense()
-Out[28]:
+In [8]: csr_matrix((values, (rows, cols)), shape=(n, m)).todense()
+Out[8]:
 matrix([[0.81093019, 0.        , 0.4054651 , 0.        , 0.        ],
-        [0.4054651 , 0.        , 0.        , 0.        , 1.09861231],
+        [0.4054651 , 0.        , 0.        , 1.09861231, 1.09861231],
         [0.        , 0.        , 0.4054651 , 0.        , 0.        ]])
 ```
-
