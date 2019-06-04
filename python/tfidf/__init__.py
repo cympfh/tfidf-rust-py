@@ -86,4 +86,4 @@ def tf(corpus: Corpus) -> csr_matrix:
     ----------
     corpus : Corpus
     """
-    return _to_csr_matrix(libtfidf.tfidf(corpus.docs))
+    return _to_csr_matrix(libtfidf.tf(corpus.docs))
