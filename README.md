@@ -2,72 +2,66 @@
 
 `tf-idf` library for Python written in Rust.
 
-## Build `.so` library file
+## Build `.so` file
 
-`rustc` 1.25.0+ required (`stable` is ok).
+For building, `rustc` 1.25.0+ required (`stable` is ok).
 
 ```bash
    rustc --version
 rustc 1.32.0 (9fda7c223 2019-01-16)
 
-   make
+   make build
 ```
 
-Either `target/release/libtfidf.so` or `target/release/libtfidf.dylib` will be produced
-(If you are Mac user, you will find `dylib`.)
+Either `target/release/libtfidf.so` or `target/release/libtfidf.dylib` will be produced.
+If you are Mac user, you will find `dylib`.
 
-## import from Python
+## Install as Python library
 
-Copy the `so` (or `dylib`) file as `libtfidf.so`, and you can import it from Python.
+Just type
 
 ```bash
-   cp target/release/libtfidf.dylib ~/test/libtfidf.so  # on Mac
-   # or:  cp target/release/libtfidf.so ~/test/libtfidf.so  # on Linux
-   cd ~/test
+   make install
 ```
 
+This command copies the `so` file and an interface `__init__.py` to your path directory.
+
+## How to use
+
 ```python
-# ipython
-In [1]: from libtfidf import tfidf
+In [1]: import tfidf
 
-In [2]: corpus = [[0, 0, 1, 2], [0, 1, 3, 4], [1, 2]]l
+In [2]: docs = [['a', 'a', 'b', 'c'], ['a', 'b', 'd', 'e'], ['b', 'c']]
 
-# A corpus is a list of document.
-# A document is a list of word.
-# Word is natural integer (0,1,2,...).
+# define your documents
+# documents = list[document]
+# document = list[word]
+# word is Any (but hashable) value (int, str...)
 
-In [3]: tfidf(corpus)
-Out[3]:
-(3,
- 5,
- [(0, 0, 0.8109301924705505),
-  (0, 2, 0.40546509623527527),
-  (1, 0, 0.40546509623527527),
-  (1, 3, 1.0986123085021973),
-  (1, 4, 1.0986123085021973),
-  (2, 2, 0.40546509623527527)])
+In [3]: corpus = tfidf.Corpus(docs)
 
-# Output is a matrix, its shape is (document-size)x(vocaburary-size)
+# make corpus
+# (This process converts words in documents to int)
 
-# This is 3x5 matrix
-# The list in 3rd position is a list of (row, column, value)
-
-# This matrix will be converted to scipy.sparse.csr_matrix easily
-
-In [4]: from scipy.sparse import csr_matrix
-
-In [5]: n, m, data = tfidf(corpus)
-
-In [6]: rows, cols, values = zip(*data)
-
-In [7]: csr_matrix((values, (rows, cols)), shape=(n, m))
-Out[7]:
+In [4]: tfidf.tfidf(corpus)
+Out[4]:
 <3x5 sparse matrix of type '<class 'numpy.float64'>'
         with 6 stored elements in Compressed Sparse Row format>
 
-In [8]: csr_matrix((values, (rows, cols)), shape=(n, m)).todense()
-Out[8]:
+# tfidf.tfidf computes tf-idf (csr-)matrix
+
+In [5]: Out[4].todense()
+Out[5]:
 matrix([[0.81093019, 0.        , 0.4054651 , 0.        , 0.        ],
         [0.4054651 , 0.        , 0.        , 1.09861231, 1.09861231],
         [0.        , 0.        , 0.4054651 , 0.        , 0.        ]])
+
+# csr-matrix can be converted to numpy.matrix
+
+# you can see the max value is (0, 0) in 0-th row
+# This means that 0-th word in the 0-th document has highest tf-idf.
+# Let's get 0-th word
+
+In [6]: corpus.voc.get(0)
+Out[6]: 'a'
 ```
