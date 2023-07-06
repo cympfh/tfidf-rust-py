@@ -8,7 +8,7 @@ setup(
     author_email='cympfh@gmail.com',
     url='https://github.com/cympfh/tfidf-rust-py',
     install_requires=[
-        'scipy==1.1.0',
+        'scipy==1.10.0',
     ],
     packages=['tfidf'],
     package_data={
